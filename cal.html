@@ -1,0 +1,499 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Calculator</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: #f1f5f9;
+            background:
+                radial-gradient(circle at top left, #183657, transparent 40%),
+                linear-gradient(135deg, #080d18, #111827 60%, #080d18);
+        }
+
+        .calculator {
+            width: 100%;
+            max-width: 460px;
+            padding: 25px;
+            background: rgba(17, 27, 45, 0.96);
+            border: 1px solid #29384d;
+            border-radius: 24px;
+            box-shadow: 0 25px 80px #0008;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+
+        .header h1 {
+            font-size: 21px;
+            letter-spacing: 0.3px;
+        }
+
+        .header p {
+            margin-top: 5px;
+            color: #91a2bb;
+            font-size: 12px;
+        }
+
+        .brand {
+            color: #60a5fa;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .mode {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .mode button {
+            padding: 7px 14px;
+            color: #93c5fd;
+            background: #172b46;
+            border: 1px solid #2d4c70;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        #status {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .display {
+            padding: 20px 17px;
+            margin-bottom: 18px;
+            min-height: 125px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 14px;
+            background: #080f1d;
+            border: 1px solid #26364c;
+            border-radius: 15px;
+            text-align: right;
+            overflow: hidden;
+        }
+
+        #expression {
+            min-height: 20px;
+            color: #94a3b8;
+            font-size: 15px;
+            overflow-wrap: anywhere;
+        }
+
+        #result {
+            font-size: clamp(28px, 7vw, 36px);
+            font-weight: 600;
+            color: #f8fafc;
+            overflow-wrap: anywhere;
+        }
+
+        .keys {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 9px;
+        }
+
+        .key {
+            min-width: 0;
+            min-height: 53px;
+            border: 1px solid #29384d;
+            border-radius: 11px;
+            color: #e2e8f0;
+            background: #1b293d;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.15s;
+        }
+
+        .key:hover {
+            background: #2a3c54;
+            transform: translateY(-1px);
+        }
+
+        .key:active {
+            transform: scale(0.96);
+        }
+
+        .scientific {
+            color: #93c5fd;
+            background: #14243a;
+            font-size: 14px;
+        }
+
+        .operator {
+            color: #fbbf24;
+            background: #302817;
+            border-color: #594421;
+        }
+
+        .clear {
+            color: #fca5a5;
+            background: #3b2029;
+            border-color: #63313e;
+        }
+
+        .equals {
+            color: white;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            border-color: #5278ff;
+            font-size: 22px;
+        }
+
+        .zero {
+            grid-column: span 2;
+        }
+
+        .history {
+            margin-top: 20px;
+            border-top: 1px solid #29384d;
+            padding-top: 15px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .history h2 {
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+
+        .history button {
+            border: none;
+            background: transparent;
+            color: #60a5fa;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        #historyList {
+            list-style: none;
+            max-height: 95px;
+            overflow-y: auto;
+        }
+
+        #historyList li {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 7px 2px;
+            color: #94a3b8;
+            font-size: 12px;
+            overflow-wrap: anywhere;
+        }
+
+        #historyList li span:last-child {
+            color: #e2e8f0;
+        }
+
+        .footer {
+            margin-top: 17px;
+            text-align: center;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        @media (max-width: 380px) {
+            .calculator {
+                padding: 16px;
+            }
+
+            .keys {
+                gap: 6px;
+            }
+
+            .key {
+                min-height: 47px;
+                font-size: 14px;
+            }
+
+            .scientific {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="calculator">
+
+    <div class="header">
+        <div>
+            <h1>Engineering Calculator </h1>
+            <p>Scientific precision · Simple interface</p>
+        </div>
+        <span class="brand">SCIENTIFIC</span>
+    </div>
+
+    <div class="mode">
+        <button id="angleMode" onclick="toggleMode()">DEG</button>
+        <span id="status">Ready to calculate</span>
+    </div>
+
+    <div class="display">
+        <div id="expression">0</div>
+        <div id="result">0</div>
+    </div>
+
+    <div class="keys">
+        <button class="key scientific" onclick="insert('sin(')">sin</button>
+        <button class="key scientific" onclick="insert('cos(')">cos</button>
+        <button class="key scientific" onclick="insert('tan(')">tan</button>
+        <button class="key scientific" onclick="insert('log(')">log</button>
+        <button class="key scientific" onclick="insert('ln(')">ln</button>
+
+        <button class="key scientific" onclick="insert('sqrt(')">√</button>
+        <button class="key scientific" onclick="insert('^2')">x²</button>
+        <button class="key scientific" onclick="insert('^')">xʸ</button>
+        <button class="key scientific" onclick="insert('(')">(</button>
+        <button class="key scientific" onclick="insert(')')">)</button>
+
+        <button class="key clear" onclick="clearAll()">AC</button>
+        <button class="key clear" onclick="backspace()">DEL</button>
+        <button class="key scientific" onclick="insert('pi')">π</button>
+        <button class="key scientific" onclick="insert('e')">e</button>
+        <button class="key operator" onclick="insert('/')">÷</button>
+
+        <button class="key" onclick="insert('7')">7</button>
+        <button class="key" onclick="insert('8')">8</button>
+        <button class="key" onclick="insert('9')">9</button>
+        <button class="key operator" onclick="insert('*')">×</button>
+        <button class="key operator" onclick="insert('%')">%</button>
+
+        <button class="key" onclick="insert('4')">4</button>
+        <button class="key" onclick="insert('5')">5</button>
+        <button class="key" onclick="insert('6')">6</button>
+        <button class="key operator" onclick="insert('-')">−</button>
+        <button class="key scientific" onclick="insert('!')">n!</button>
+
+        <button class="key" onclick="insert('1')">1</button>
+        <button class="key" onclick="insert('2')">2</button>
+        <button class="key" onclick="insert('3')">3</button>
+        <button class="key operator" onclick="insert('+')">+</button>
+        <button class="key scientific" onclick="insert('ans')">ANS</button>
+
+        <button class="key zero" onclick="insert('0')">0</button>
+        <button class="key" onclick="insert('.')">.</button>
+        <button class="key equals" onclick="calculate()">=</button>
+    </div>
+
+    <div class="history">
+        <div class="history-header">
+            <h2>Calculation History</h2>
+            <button onclick="clearHistory()">Clear history</button>
+        </div>
+        <ul id="historyList">
+            <li>No calculations yet</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        Built for everyday scientific calculations
+    </div>
+
+</div>
+
+<script>
+    const expressionDisplay = document.getElementById("expression");
+    const resultDisplay = document.getElementById("result");
+    const statusDisplay = document.getElementById("status");
+    const historyList = document.getElementById("historyList");
+    const angleButton = document.getElementById("angleMode");
+
+    let expression = "";
+    let answer = 0;
+    let isDegree = true;
+    let justCalculated = false;
+
+    function updateDisplay() {
+        expressionDisplay.textContent = expression || "0";
+    }
+
+    function insert(value) {
+        if (justCalculated && /[0-9.]$/.test(value)) {
+            expression = "";
+        }
+
+        justCalculated = false;
+        expression += value;
+        updateDisplay();
+        statusDisplay.textContent = "Editing expression";
+    }
+
+    function clearAll() {
+        expression = "";
+        resultDisplay.textContent = "0";
+        expressionDisplay.textContent = "0";
+        statusDisplay.textContent = "Ready to calculate";
+        justCalculated = false;
+    }
+
+    function backspace() {
+        expression = expression.slice(0, -1);
+        justCalculated = false;
+        updateDisplay();
+    }
+
+    function toggleMode() {
+        isDegree = !isDegree;
+        angleButton.textContent = isDegree ? "DEG" : "RAD";
+        statusDisplay.textContent = isDegree
+            ? "Degree mode enabled"
+            : "Radian mode enabled";
+    }
+
+    function factorial(n) {
+        if (!Number.isInteger(n) || n < 0 || n > 170) {
+            throw new Error("Factorial requires an integer from 0 to 170");
+        }
+
+        let value = 1;
+
+        for (let i = 2; i <= n; i++) {
+            value *= i;
+        }
+
+        return value;
+    }
+
+    function calculate() {
+        if (!expression.trim()) return;
+
+        try {
+            let exp = expression
+                .replace(/π/g, "pi")
+                .replace(/×/g, "*")
+                .replace(/÷/g, "/")
+                .replace(/\s+/g, "");
+
+            // Convert scientific functions to JavaScript Math functions.
+            exp = exp
+                .replace(/\bpi\b/g, "Math.PI")
+                .replace(/\be\b/g, "Math.E")
+                .replace(/\bans\b/g, `(${answer})`)
+                .replace(/\^/g, "**");
+
+            // Convert factorial expressions such as 5! to factorial(5).
+            exp = exp.replace(
+                /(\b(?:\d+(?:\.\d+)?|Math\.PI|Math\.E|\([^()]*\)))!/g,
+                "factorial($1)"
+            );
+
+            // Convert scientific functions.
+            exp = exp.replace(/\bsqrt\(/g, "Math.sqrt(");
+            exp = exp.replace(/\blog\(/g, "Math.log10(");
+            exp = exp.replace(/\bln\(/g, "Math.log(");
+
+            if (isDegree) {
+                exp = exp
+                    .replace(/\bsin\(/g, "Math.sin((Math.PI/180)*")
+                    .replace(/\bcos\(/g, "Math.cos((Math.PI/180)*")
+                    .replace(/\btan\(/g, "Math.tan((Math.PI/180)*");
+            } else {
+                exp = exp
+                    .replace(/\bsin\(/g, "Math.sin(")
+                    .replace(/\bcos\(/g, "Math.cos(")
+                    .replace(/\btan\(/g, "Math.tan(");
+            }
+
+            // Allow only calculator-generated mathematical syntax.
+            if (!/^[0-9+\-*/().,%\sA-Za-z_]*$/.test(exp)) {
+                throw new Error("Invalid expression");
+            }
+
+            const result = Function(
+                "factorial",
+                `"use strict"; return (${exp});`
+            )(factorial);
+
+            if (typeof result !== "number" || !Number.isFinite(result)) {
+                throw new Error("Result is undefined or out of range");
+            }
+
+            answer = result;
+            resultDisplay.textContent = Number(result.toPrecision(12)).toString();
+            statusDisplay.textContent = "Calculation successful";
+
+            addHistory(expression, resultDisplay.textContent);
+            justCalculated = true;
+
+        } catch (error) {
+            resultDisplay.textContent = "Error";
+            statusDisplay.textContent = error.message || "Invalid expression";
+        }
+    }
+
+    function addHistory(exp, result) {
+        if (historyList.children.length === 1 &&
+            historyList.textContent.includes("No calculations yet")) {
+            historyList.innerHTML = "";
+        }
+
+        const item = document.createElement("li");
+        const left = document.createElement("span");
+        const right = document.createElement("span");
+
+        left.textContent = exp;
+        right.textContent = result;
+
+        item.append(left, right);
+        historyList.prepend(item);
+
+        while (historyList.children.length > 5) {
+            historyList.lastElementChild.remove();
+        }
+    }
+
+    function clearHistory() {
+        historyList.innerHTML = "<li>No calculations yet</li>";
+    }
+
+    document.addEventListener("keydown", function(event) {
+        const key = event.key;
+
+        if (/^[0-9.]$/.test(key)) {
+            insert(key);
+        } else if (["+", "-", "*", "/", "(", ")", "%", "^"].includes(key)) {
+            insert(key);
+        } else if (key === "Enter" || key === "=") {
+            event.preventDefault();
+            calculate();
+        } else if (key === "Backspace") {
+            backspace();
+        } else if (key === "Escape") {
+            clearAll();
+        }
+    });
+</script>
+
+</body>
+</html>
